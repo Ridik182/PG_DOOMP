@@ -17659,9 +17659,9 @@ INSERT INTO temp_Votes_import VALUES
 INSERT INTO Votes (Id, PostId, VoteTypeId, CreationDate)
 SELECT 
     (xpath('//row/@Id', xml_data))[1]::text::int,
-    (xpath('//row/@UserId', xml_data))[1]::text::int,
-    (xpath('//row/@Name', xml_data))[1]::text::SMALLINT,
-    (xpath('//row/@Date', xml_data))[1]::text::timestamp
+    (xpath('//row/@PostId', xml_data))[1]::text::int,
+    (xpath('//row/@VoteTypeId', xml_data))[1]::text::SMALLINT,
+    (xpath('//row/@CreationDate', xml_data))[1]::text::timestamp
    
 FROM 
     (SELECT unnest(xpath('//Votes/row', data::xml)) AS xml_data 
