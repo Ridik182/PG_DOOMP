@@ -1,1 +1,125 @@
+CREATE SCHEMA IF NOT EXISTS se_data;
 
+
+
+CREATE TABLE IF NOT EXISTS Badges (
+    Id INT PRIMARY KEY,
+    UserId INT NOT NULL,
+    Name TEXT NOT NULL,
+    Date TIMESTAMP NOT NULL,
+    Class SMALLINT NOT NULL CHECK (Class BETWEEN 1 AND 3),
+    TagBased BOOLEAN NOT NULL,
+    ContentLicense TEXT  
+);
+
+CREATE TABLE IF NOT EXISTS Comments (
+    Id INT PRIMARY KEY,
+    PostId INT NOT NULL,
+    Score INT NOT NULL,
+    Text TEXT NOT NULL,
+    CreationDate TIMESTAMP NOT NULL,
+    UserDisplayName TEXT,
+    UserId INT,  
+    ContentLicense TEXT, 
+    FOREIGN KEY (PostId) REFERENCES Posts(Id)
+);
+
+CREATE TABLE IF NOT EXISTS PostHistory (
+    Id INT PRIMARY KEY,
+    PostHistoryTypeId SMALLINT NOT NULL,
+    PostId INT NOT NULL,
+    RevisionGUID UUID,
+    CreationDate TIMESTAMP NOT NULL,
+    UserId INT,
+    UserDisplayName TEXT,
+    Comment TEXT,
+    Text TEXT,
+    ContentLicense TEXT,
+    FOREIGN KEY (PostId) REFERENCES Posts(Id)
+);
+
+CREATE TABLE IF NOT EXISTS PostLinks (
+    Id INT PRIMARY KEY,
+    CreationDate TIMESTAMP NOT NULL,
+    PostId INT NOT NULL,
+    RelatedPostId INT NOT NULL,
+    LinkTypeId SMALLINT NOT NULL CHECK (LinkTypeId IN (1, 3)),
+    FOREIGN KEY (PostId) REFERENCES Posts(Id),
+    FOREIGN KEY (RelatedPostId) REFERENCES Posts(Id)
+);
+
+CREATE TABLE IF NOT EXISTS Posts (
+    Id INT PRIMARY KEY,
+    PostTypeId SMALLINT NOT NULL CHECK (PostTypeId IN (
+        1,2,3,4,5,6,7,8,9,10,12,13,14,15,17
+    )),
+    AcceptedAnswerId INT,
+    ParentId INT,
+    CreationDate TIMESTAMP NOT NULL,
+    DeletionDate TIMESTAMP, 
+    Score INT,
+    ViewCount INT,
+    Body TEXT NOT NULL,
+    OwnerUserId INT,
+    OwnerDisplayName TEXT,
+    LastEditorUserId INT,
+    LastEditorDisplayName TEXT,
+    LastEditDate TIMESTAMP,
+    LastActivityDate TIMESTAMP NOT NULL,
+    Title TEXT,
+    Tags TEXT,
+    AnswerCount INT,
+    CommentCount INT,
+    FavoriteCount INT,
+    ClosedDate TIMESTAMP,  
+    CommunityOwnedDate TIMESTAMP,  
+    ContentLicense TEXT,  
+    FOREIGN KEY (ParentId) REFERENCES Posts(Id),
+    FOREIGN KEY (AcceptedAnswerId) REFERENCES Posts(Id),
+    CHECK (
+        (PostTypeId = 1 AND ParentId IS NULL) OR  
+        (PostTypeId = 2 AND ParentId IS NOT NULL)  
+    )
+);
+
+CREATE TABLE IF NOT EXISTS Tags (
+    Id INT PRIMARY KEY,
+    TagName TEXT NOT NULL UNIQUE,
+    Count INT NOT NULL,
+    ExcerptPostId INT, 
+    WikiPostId INT, 
+    IsModeratorOnly BOOLEAN NOT NULL,
+    IsRequired BOOLEAN NOT NULL,
+    FOREIGN KEY (ExcerptPostId) REFERENCES Posts(Id),
+    FOREIGN KEY (WikiPostId) REFERENCES Posts(Id)
+);
+
+CREATE TABLE IF NOT EXISTS Users (
+    Id INT PRIMARY KEY,
+    Reputation INT NOT NULL,
+    CreationDate TIMESTAMP NOT NULL,
+    DisplayName TEXT,
+    LastAccessDate TIMESTAMP NOT NULL,
+    WebsiteUrl TEXT,
+    Location TEXT,
+    AboutMe TEXT,
+    Views INT NOT NULL,
+    UpVotes INT NOT NULL,
+    DownVotes INT NOT NULL,
+    ProfileImageUrl TEXT,
+    AccountId INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Votes (
+    Id INT PRIMARY KEY,
+    PostId INT NOT NULL,
+    VoteTypeId SMALLINT NOT NULL CHECK (VoteTypeId BETWEEN -1 AND 37),
+    UserId INT, 
+    CreationDate TIMESTAMP NOT NULL,
+    BountyAmount INT, 
+    FOREIGN KEY (PostId) REFERENCES Posts(Id),
+    CHECK (
+        (VoteTypeId IN (5,8) AND UserId IS NOT NULL) OR
+        (VoteTypeId NOT IN (5,8) AND UserId IS NULL)
+    )
+);
